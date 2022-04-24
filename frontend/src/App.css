@@ -1,0 +1,22 @@
+
+
+ .position-relative{
+    position: relative!important;
+	overflow: hidden;
+}
+/* *, :after, :before {
+    box-sizing: border-box;
+} */
+ .copy-button{
+	position: absolute;
+	right: 1%;
+	top:1%;
+	width: auto;
+	background-color: #ccc;
+	color: black;
+	
+	
+} 
+
+.title-row{
+}
