@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Col, Image, Row } from "react-bootstrap";
+import { Button, ButtonGroup, Col, Image, Spinner } from "react-bootstrap";
 
 const PreviewImage = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState();
   const [data, setData] = useState(null);
   const [copyButton, setCopyButton] = useState("Copy");
+  const [spinnerVisible, setSpinnerVisible] = useState(false);
   const fileRef = useRef();
 
   useEffect(() => {
@@ -21,6 +22,7 @@ const PreviewImage = () => {
   }, [image]);
 
   const handleConvert = (e) => {
+    setSpinnerVisible(true);
     e.preventDefault();
     const url = "/upload";
     const formData = new FormData();
@@ -31,7 +33,10 @@ const PreviewImage = () => {
     };
     fetch(url, requestOptions)
       .then((res) => res.json())
-      .then((result) => setData(result))
+      .then((result) => {
+        setData(result);
+        setSpinnerVisible(false);
+      })
       .catch((error) => console.log("Form submit error", error));
   };
 
@@ -44,50 +49,61 @@ const PreviewImage = () => {
   };
   return (
     <>
-      <Row className="py-3">
-        <Col className="justify-content-center d-flex">
-          <form>
-            <button
+      <Col className="col-12 text-center ">
+        <form>
+          <ButtonGroup className="gap-3 ">
+            <Button
+              role="group"
               type="button"
-              onClick={(e) => {
-                // e.preventDefault();
+              onClick={() => {
                 fileRef.current.click();
               }}
             >
               Add Image
-            </button>
-            <button onClick={handleConvert}>Convert Image</button>
-            <input
-              type="file"
-              name="file"
-              style={{ display: "none" }}
-              ref={fileRef}
-              //   accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file && file.type.includes("image")) {
-                  setImage(file);
-                } else {
-                  setImage(null);
-                }
-                setData(null);
-              }}
-            />
-          </form>
+            </Button>
+            <Button role="group" onClick={handleConvert}>
+              Convert Image
+            </Button>
+          </ButtonGroup>
+          <input
+            type="file"
+            name="file"
+            style={{ display: "none" }}
+            ref={fileRef}
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (file && file.type.includes("image")) {
+                setImage(file);
+              } else {
+                setImage(null);
+              }
+              setData(null);
+            }}
+          />
+        </form>
+      </Col>
+      {spinnerVisible && !data && (
+        <Col className="col-12 text-center">
+          <Spinner animation="border" variant="primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
         </Col>
-      </Row>
-      <Row className="row-cols-1 row-cols-lg-2 p-3  ">
-        {/* <div className="  image-div"> */}
+      )}
+      <Col className="col-12 col-md-6 p-3 align-self-stretch mw-50">
         {image && (
-          <Col className="col-lg-6 border border-primary p-3 ">
-            {" "}
-            <Image fluid src={preview} alt={image.name} />
-          </Col>
+          <Image
+            fluid
+            className="d-block ms-auto me-auto"
+            src={preview}
+            alt={image.name}
+          />
         )}
-        {/* </div> */}
+      </Col>
+      <Col className="col-12 col-md-6 position-relative p-3 pt-3 align-self-stretch mw-50">
         {data && (
-          <Col className="col-lg-6 border border-primary p-4 position-relative">
-            <div className="mt-3">{data.content}</div>
+          <>
+            <div>{data.content}</div>
             <Button
               className="copy-button btn-clipboard"
               data-bs-toggle="tooltip"
@@ -97,9 +113,9 @@ const PreviewImage = () => {
             >
               {copyButton}
             </Button>
-          </Col>
+          </>
         )}
-      </Row>
+      </Col>
     </>
   );
 };

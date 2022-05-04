@@ -1,8 +1,11 @@
 import React from "react";
+import { Col } from "react-bootstrap";
 
 const Title = () => {
   return (
-    <h1 className="d-flex mb-3 p-3 justify-content-center">Image to Text</h1>
+    <Col className=" col-12 bg-primary  text-light p-2 text-center fw-bolder">
+      <h1 className="">Image to Text</h1>
+    </Col>
   );
 };
 

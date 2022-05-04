@@ -1,16 +1,19 @@
 import { Container, Row } from "react-bootstrap";
 import PreviewImage from "./components/PreviewImage";
 import Title from "./components/Title";
-import UploadForm from "./components/UploadForm";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
+// TODO: make Convert Button disabled when pushed once, after fixing backend consecutive request issue
+
 function App() {
   return (
-    <Container fluid className="mt-3">
-      <Title className="d-flex justify-content-center" />
-      {/* <UploadForm /> */}
-      <PreviewImage />
+    <Container fluid>
+      <Row className="justify-content-center align-items-center gy-3">
+        <Title />
+        {/* <UploadForm /> */}
+        <PreviewImage />
+      </Row>
     </Container>
   );
 }
