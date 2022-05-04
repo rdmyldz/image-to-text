@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/rdmyldz/i2t/tesseract"
@@ -31,7 +32,18 @@ func (a *application) handleHome(w http.ResponseWriter, r *http.Request) {
 	err := ts.ExecuteTemplate(w, "index.html", nil)
 	log.Printf("error: %v", err)
 }
+
 func (a *application) handleUpload(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	defer func(t time.Time) {
+		log.Printf("since: client: %s - %v\n", time.Since(t), r.RemoteAddr)
+	}(start)
+
+	handle, err := tesseract.TessBaseAPICreate("tur+eng")
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// w.Header().Set("Access-Control-Allow-Methods", "POST, GET ")
 	// w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization ")
@@ -58,7 +70,7 @@ func (a *application) handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("fsize in handler: %v\n", len(f))
-	texts, err := a.handle.ProcessImageMem(f)
+	texts, err := handle.ProcessImageMem(f)
 	if err != nil {
 		log.Println("error ProcessImageMem: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -86,15 +98,18 @@ func (app *application) routes() http.Handler {
 	return router
 }
 
+// TODO: implement a worker pool
+// for now, carried to create the tesseract instance into handleUpload
+// since this way, we can't convert images to texts concurrently
 func main() {
-	handle, err := tesseract.TessBaseAPICreate("tur+eng")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// handle, err := tesseract.TessBaseAPICreate("tur+eng")
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
 	addr := flag.String("addr", ":8080", "http network address")
 	app := &application{
-		handle: handle,
+		// handle: handle,
 	}
 
 	srv := &http.Server{
