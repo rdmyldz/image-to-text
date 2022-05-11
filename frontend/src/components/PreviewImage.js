@@ -7,6 +7,7 @@ const PreviewImage = () => {
   const [data, setData] = useState(null);
   const [copyButton, setCopyButton] = useState("Copy");
   const [spinnerVisible, setSpinnerVisible] = useState(false);
+  const [error, setError] = useState(null);
   const fileRef = useRef();
 
   useEffect(() => {
@@ -22,8 +23,9 @@ const PreviewImage = () => {
   }, [image]);
 
   const handleConvert = (e) => {
-    setSpinnerVisible(true);
     e.preventDefault();
+    setSpinnerVisible(true);
+
     const url = "/upload";
     const formData = new FormData();
     formData.append("file", image);
@@ -32,12 +34,30 @@ const PreviewImage = () => {
       body: formData,
     };
     fetch(url, requestOptions)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw Error(
+            "Could not convert the image. Check to see if the backend is up and working"
+          );
+        }
+        return res.json();
+      })
       .then((result) => {
         setData(result);
         setSpinnerVisible(false);
+        setError(null);
       })
-      .catch((error) => console.log("Form submit error", error));
+      .catch((error) => {
+        console.log("Form submit error:", error.message);
+        setSpinnerVisible(false);
+        if (error.message === "Failed to fetch") {
+          setError(
+            "Could not convert the image. Check to see if the backend is up and working"
+          );
+        } else {
+          setError(error.message);
+        }
+      });
   };
 
   const handleCopy = async (text) => {
@@ -61,9 +81,15 @@ const PreviewImage = () => {
             >
               Add Image
             </Button>
-            <Button role="group" onClick={handleConvert}>
-              Convert Image
-            </Button>
+            {!spinnerVisible ? (
+              <Button role="group" onClick={handleConvert}>
+                Convert Image
+              </Button>
+            ) : (
+              <Button disabled role="group" onClick={handleConvert}>
+                Converting...
+              </Button>
+            )}
           </ButtonGroup>
           <input
             type="file"
@@ -90,32 +116,41 @@ const PreviewImage = () => {
           </Spinner>
         </Col>
       )}
-      <Col className="col-12 col-md-6 p-3 align-self-stretch mw-50">
-        {image && (
-          <Image
-            fluid
-            className="d-block ms-auto me-auto"
-            src={preview}
-            alt={image.name}
-          />
-        )}
-      </Col>
-      <Col className="col-12 col-md-6 position-relative p-3 pt-3 align-self-stretch mw-50">
-        {data && (
-          <>
-            <div>{data.content}</div>
-            <Button
-              className="copy-button btn-clipboard"
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              title="Copy to clipboard"
-              onClick={() => handleCopy(data.content)}
-            >
-              {copyButton}
-            </Button>
-          </>
-        )}
-      </Col>
+      {!error ? (
+        <>
+          {" "}
+          <Col className="col-12 col-md-6 p-3 align-self-stretch mw-50">
+            {image && (
+              <Image
+                fluid
+                className="d-block ms-auto me-auto"
+                src={preview}
+                alt={image.name}
+              />
+            )}
+          </Col>
+          <Col className="col-12 col-md-6 position-relative p-3 pt-3 align-self-stretch mw-50">
+            {data && (
+              <>
+                <pre>{data.content}</pre>
+                <Button
+                  className="copy-button btn-clipboard"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="Copy to clipboard"
+                  onClick={() => handleCopy(data.content)}
+                >
+                  {copyButton}
+                </Button>
+              </>
+            )}
+          </Col>
+        </>
+      ) : (
+        <Col className="text-center">
+          <div>{error}</div>
+        </Col>
+      )}
     </>
   );
 };
