@@ -1,4 +1,4 @@
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
-github.com/rdmyldz/i2t v0.0.0-20220421211800-e20d399ef024 h1:BVzuEgSKKl8tG4dZCwas1BpedYPozn3ClyWw6mhMfcU=
-github.com/rdmyldz/i2t v0.0.0-20220421211800-e20d399ef024/go.mod h1:dmX0Q8v8oie8d8BHa7UNUXp3GEFcCHefH04g44hlmmI=
+github.com/rdmyldz/i2t v0.0.0-20220508215353-2c205fbe57d0 h1:XyvLEQpRFxy/sQDKaVYa/lN3mhz0npb4wlPdT1/602g=
+github.com/rdmyldz/i2t v0.0.0-20220508215353-2c205fbe57d0/go.mod h1:dmX0Q8v8oie8d8BHa7UNUXp3GEFcCHefH04g44hlmmI=
