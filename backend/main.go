@@ -28,9 +28,11 @@ type application struct {
 }
 
 func (a *application) handleHome(w http.ResponseWriter, r *http.Request) {
-	log.Printf("path: %q\n", r.URL.Path)
 	err := ts.ExecuteTemplate(w, "index.html", nil)
-	log.Printf("error: %v", err)
+	if err != nil {
+		log.Printf("in handleHome: error: %v", err)
+		return
+	}
 }
 
 type result struct {
@@ -47,18 +49,19 @@ func (a *application) handleUpload(w http.ResponseWriter, r *http.Request) {
 
 	handle, err := tesseract.TessBaseAPICreateWithMonitor("tur+eng")
 	if err != nil {
-		log.Println(err)
+		log.Printf("in handleUpload(): error while creating handle: %v\n", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	r.ParseMultipartForm(10 << 20)
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
+		log.Printf("error retrieving formFile: %v\n", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
@@ -69,22 +72,20 @@ func (a *application) handleUpload(w http.ResponseWriter, r *http.Request) {
 
 	f, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Println("error reading r.Body")
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("error reading r.body: %v\n", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	ch := make(chan result)
 	go func() {
 		defer close(ch)
-		fmt.Printf("fsize in handler: %v\n", len(f))
 		texts, err := handle.ProcessImageMem(f)
 		if err != nil {
 			ch <- result{text: nil, err: err}
 			return
 		}
 
-		log.Printf("path: %q\n", r.URL.Path)
 		d := data{Content: texts}
 		jsonResp, err := json.Marshal(d)
 		if err != nil {
@@ -104,8 +105,8 @@ func (a *application) handleUpload(w http.ResponseWriter, r *http.Request) {
 		handle.Delete()
 	case r := <-ch:
 		if r.err != nil {
-			log.Println("error ProcessImageMem: ", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Printf("error ProcessImageMem: %v\n", r.err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		w.Write(r.text)
@@ -129,6 +130,7 @@ func (app *application) routes() http.Handler {
 // since this way, we can't convert images to texts concurrently
 func main() {
 	addr := flag.String("addr", ":8080", "http network address")
+	flag.Parse()
 	app := &application{
 		// handle: handle,
 	}
