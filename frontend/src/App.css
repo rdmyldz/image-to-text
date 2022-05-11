@@ -16,3 +16,7 @@
 	opacity: 0.7;
 
 }
+
+.converted {
+	white-space: pre-wrap;
+}

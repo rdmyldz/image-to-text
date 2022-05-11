@@ -132,7 +132,7 @@ const PreviewImage = () => {
           <Col className="col-12 col-md-6 position-relative p-3 pt-3 align-self-stretch mw-50">
             {data && (
               <>
-                <pre>{data.content}</pre>
+                <div className="converted">{data.content}</div>
                 <Button
                   className="copy-button btn-clipboard"
                   data-bs-toggle="tooltip"
